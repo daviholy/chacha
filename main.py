@@ -30,5 +30,4 @@ if __name__ == "__main__":
         print(genkey())
     else:
         print(decodekey(sys.argv[1]))
-        ((((((([[[[[[{{{{{{{[[]]}}}}}}}]]]]]])))))))
         
