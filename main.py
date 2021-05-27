@@ -3,6 +3,8 @@ import sys
 import secrets
 import base64
 
+ITERATIONS = 10
+
 
 def xor(data: bytes, key: bytes) -> bytes:
     """xor the byte arrays of same length"""
@@ -19,15 +21,46 @@ def genKey() -> bytes:
         tmp[i] = secrets.randbits(64)
     return (base64.a85encode(tmp))
 
-def genNonce():
+
+def genNonce() -> np.uint32:
+    """generate 96bit nonce"""
     return [np.uint32(secrets.randbits(32)) for _ in range(3)]
 
-def genKeyBlock(key: np.uint32, nonce: np.uint32,counter: np.uint32) -> bytes:
-    block = [np.int32(0x65787061), np.int32([0x6e642033]), np.int32([0x322d6279]), np.int32([0x7465206b]),  # "expand 32-byte k" constant
+
+def genKeyBlock(key: np.uint32, nonce: np.uint32, counter: np.uint32) -> bytes:
+    """generate block for the specified segment"""
+
+    def QR(a: np.uint32, b: np.uint32, c: np.uint32, d: np.uint32) -> None:
+        """chachas quarter round function"""
+        a += b
+        d = np.bitwise_xor(a, d)
+        d = lR(d, 16)
+        c += d
+        b = np.bitwise_xor(b, c)
+        b = lR(b, 12)
+        a += b
+        d = np.bitwise_xor(d, a)
+        d = lR(d, 8)
+        c += d
+        b = np.bitwise_xor(b, c)
+        b = lR(7)
+
+    block = [np.uint32(0x65787061), np.uint32([0x6e642033]), np.uint32([0x322d6279]), np.uint32([0x7465206b]),  # "expand 32-byte k" constant
              key[0], key[1], key[2], key[3],
              key[4], key[5], key[6], key[7],
-             nonce[0],nonce[1],nonce[2],counter]
-    None
+             nonce[0], nonce[1], nonce[2], counter]
+    for _ in range(ITERATIONS):
+        # odd round
+        QR(block[0], block[4], block[8], block[12])  # column 1
+        QR(block[1], block[5], block[9], block[13])  # column 2
+        QR(block[2], block[6], block[10], block[14])  # column 3
+        QR(block[3], block[7], block[11], block[15])  # column 4
+        # even round - diagonals starting from main and then going up
+        QR(block[0], block[5], block[10], block[15])
+        QR(block[1], block[6], block[11], block[12])
+        QR(block[2], block[7], block[8], block[13])
+        QR(block[3], block[4], block[9], block[14])
+    return (block)
 
 
 def decodekey(key: bytes) -> bytes:
@@ -48,7 +81,7 @@ def rR(n: np.int64, d: np.int64) -> np.uint32:
 if __name__ == "__main__":
     nonce = genNonce()
     key = decodekey(genKey())
-    key = np.frombuffer(key,dtype=np.uint32)
+    key = np.frombuffer(key, dtype=np.uint32)
     genKeyBlock(key)
     print(sys.argv[1])
     if sys.argv[1] == "-g" or sys.argv[1] == "--generate":
