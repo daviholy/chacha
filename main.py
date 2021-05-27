@@ -3,16 +3,22 @@ import sys
 import secrets
 import base64
 
+def xor(data: bytes,key: bytes) -> bytes:
+    """xor the byte arrays of same length"""
+    key = np.frombuffer(key,np.int64)
+    data= np.frombuffer(data,np.int64)
+    xored = np.bitwise_xor(key,data)
+    return xored.tobytes()
 
 def genkey() -> bytes:
-    "generate random 256 bit long key in ascii85"
+    """generate random 256 bit long key in ascii85"""
     tmp = np.empty(4)
     for i in range(4):
         tmp[i] = secrets.randbits(64)
     return (base64.a85encode(tmp))
 
 def decodekey(key: bytes) ->bytes:
-    "decode the key encoded in ascii85"
+    """decode the key encoded in ascii85"""
     return (base64.a85decode(key))
 
 def lR(n: np.uint32,d: np.uint32) -> np.uint32:
