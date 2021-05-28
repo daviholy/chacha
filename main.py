@@ -118,8 +118,8 @@ if __name__ == "__main__":
     iteration = math.floor(iteration)
     for i in range(iteration):
         block = genKeyBlock(key, nonce, i).view(np.uint8)
-        res += np.bitwise_xor(np.bitwise_xor(secret[i*64:64*i+64], block),block).tobytes()
+        res += np.bitwise_xor(np.bitwise_xor(text[i*64:64*i+64], block),block).tobytes()
     if isFloat:
         block = genKeyBlock(key, nonce, iteration + 1).view(np.uint8)
-        res += np.bitwise_xor(np.bitwise_xor(secret[iteration*64:64*iteration+(len(secret)-iteration *64)], block[:(len(secret)-iteration *64)]),block[:(len(secret)-iteration *64)]).tobytes()
+        res += np.bitwise_xor(np.bitwise_xor(text[iteration*64:64*iteration+(len(text)-iteration *64)], block[:(len(text)-iteration *64)]),block[:(len(text)-iteration *64)]).tobytes()
     print(res.decode('utf-8'))
