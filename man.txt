@@ -1,0 +1,22 @@
+usage:
+	main.py [-g | --generate]
+	main.py [-e | --encode] [options]
+	main.py [-e | --encode] [options] "text string here"
+	main.py [-d | --decode] [options]
+	main.py [-d | --decode] [options] "text string here"
+
+options:
+	-k | --key "specified key"
+		specify key
+
+	-f | --file "filepath"
+		specify the source file, if the source file isn't specified the last argument is taken as source
+
+	-g
+		generate key
+
+	-e | --encode
+		encode the given source
+
+	-d | --decode
+		decote the given source
