@@ -13,7 +13,7 @@ def genKey() -> bytes:
     tmp = np.empty(4)
     for i in range(4):
         tmp[i] = secrets.randbits(64)
-    return (base64.a85encode(tmp))
+    return (base64.standard_b64encode(tmp))
 
 
 def genNonce() -> np.uint32:
@@ -68,7 +68,7 @@ def genKeyBlock(key: np.uint32, nonce: np.uint32, counter: np.uint32) -> np.uint
 
 def decodekey(key: bytes) -> bytes:
     """decode the key encoded in ascii85"""
-    return (base64.a85decode(key))
+    return (base64.standard_b64decode(key))
 
 
 def lR(n: np.int64, d: np.int64) -> np.uint32:
@@ -82,25 +82,30 @@ def rR(n: np.int64, d: np.int64) -> np.uint32:
 
 
 if __name__ == "__main__":
+    if not sys.warnoptions:
+        import warnings
+        warnings.simplefilter("ignore")
+
     if len(sys.argv) < 2:
         exit()
     if sys.argv[1] == "-g" or sys.argv[1] == "--generate":
-        print(genKey())
+        print(genKey().decode('utf-8'))
         exit()
     else:
         index =[i for i, s in enumerate(sys.argv) if "-k" in s or "--key" in s]
         if index == []:
             print("please specify key")
             exit()
-        key = decodekey(sys.argv[index + 1])
+        key = np.frombuffer(decodekey(sys.argv[index[0] + 1]),dtype =np.uint32)
         index = [i for i, s in enumerate(sys.argv) if "-f" in s or "--file" in s]
         if index ==[]:
-            text = sys.argv[len(sys.argv) -1]
             if [i for i, s in enumerate(sys.argv) if "-d" in s or "--decode" in s] != []:
-                nonce = text[0:13]
+                text = base64.standard_b64decode(sys.argv[len(sys.argv) -1][24:])
+                nonce = [np.frombuffer(base64.standard_b64decode(sys.argv[len(sys.argv) -1][i*8:(i*8)+16]),dtype=np.uint32)[0] for i in range(3) ]
             else:
                 nonce = genNonce()
-                print(nonce.tobytes().encode("utf-8"), end="")
+                [ print(base64.standard_b64encode(i.tobytes()).decode('utf-8'), end="") for i in nonce]
+                text = sys.argv[len(sys.argv) -1].encode("utf-8")
         else:
             with open(sys.argv[index + 1]) as file:
                 if [i for i, s in enumerate(sys.argv) if "-d" in s or "--decode" in s] != []:
@@ -118,8 +123,8 @@ if __name__ == "__main__":
     iteration = math.floor(iteration)
     for i in range(iteration):
         block = genKeyBlock(key, nonce, i).view(np.uint8)
-        res += np.bitwise_xor(np.bitwise_xor(text[i*64:64*i+64], block),block).tobytes()
+        res += np.bitwise_xor(np.frombuffer(text,dtype=np.uint8, count = 64, offset = i*64), block).tobytes()
     if isFloat:
         block = genKeyBlock(key, nonce, iteration + 1).view(np.uint8)
-        res += np.bitwise_xor(np.bitwise_xor(text[iteration*64:64*iteration+(len(text)-iteration *64)], block[:(len(text)-iteration *64)]),block[:(len(text)-iteration *64)]).tobytes()
-    print(res.decode('utf-8'))
+        res += np.bitwise_xor(np.frombuffer(text, dtype=np.uint8, count=len(text)-iteration *64, offset=iteration*64) , block[:(len(text)-iteration *64)]).tobytes()
+    print(base64.standard_b64encode(res).decode('utf-8'))
