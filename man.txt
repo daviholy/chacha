@@ -1,9 +1,8 @@
 usage:
 	main.py [-g | --generate]
-	main.py [-e | --encode] [options]
+	main.py [-e | --encode] [options] -f "filepath"
 	main.py [-e | --encode] [options] "text string here"
-	main.py [-d | --decode] [options]
-	main.py [-d | --decode] [options] "text string here"
+	main.py [-d | --decode] [options] -f "filepath"
 
 options:
 	-k | --key "specified key"
@@ -16,7 +15,7 @@ options:
 		generate key
 
 	-e | --encode
-		encode the given source
+		encode the given source, don't need to be specified
 
 	-d | --decode
-		decote the given source
+		decote the given source, if specified the first 12 bytes are read as nonce
