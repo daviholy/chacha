@@ -1,8 +1,8 @@
 usage:
 	main.py [-g | --generate]
-	main.py [-e | --encode] [options]
+	main.py [-e | --encode] [options] -f "filepath"
 	main.py [-e | --encode] [options] "text string here"
-	main.py [-d | --decode] [options]
+	main.py [-d | --decode] [options] -f "filepath"
 
 options:
 	-k | --key "specified key"
