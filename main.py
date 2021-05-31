@@ -138,7 +138,7 @@ if __name__ == "__main__":
         block = genKeyBlock(key, nonce, iteration + 1).view(np.uint8)
         res += np.bitwise_xor(np.frombuffer(text, dtype=np.uint8, count=len(text)-iteration *
                               64, offset=iteration*64), block[:(len(text)-iteration * 64)]).tobytes()
-        if [i for i, s in enumerate(sys.argv) if "-d" in s or "--decode" in s] != []:
-            print(res.decode('utf-8'))
-        else:
-            print(base64.standard_b64encode(res).decode('utf-8'))
+    if [i for i, s in enumerate(sys.argv) if "-d" in s or "--decode" in s] != []:
+        print(res.decode('utf-8'))
+    else:
+        print(base64.standard_b64encode(res).decode('utf-8'))
