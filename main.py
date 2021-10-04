@@ -17,6 +17,7 @@ def genKey() -> bytes:
     return (base64.standard_b64encode(tmp))
 
 
+
 def genNonce() -> np.uint32:
     """generate 96bit nonce"""
     return [np.uint32(secrets.randbits(32)) for _ in range(3)]
